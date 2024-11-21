@@ -38,10 +38,11 @@ jobs:
       # Create the Lambda Layer ZIP (dependencies.zip)
       - name: Install Dependencies and Package Lambda Layer
         run: |
-          mkdir -p python
-          pip install -r requirements.txt -t python/
-          cd python && zip -r ../dependencies.zip . && cd ..
-          ls python/
+          mkdir -p somefolder/
+          mkdir -p somefolder/python
+          pip install -r requirements.txt -t somefolder/python/
+          cd somefolder/python && zip -r ../dependencies.zip . && cd .. && cd ..
+          ls somefolder/
 
       # Deploy Lambda Layer
       - name: Deploy Lambda Layer
