@@ -1,4 +1,4 @@
-name: Deploy Lambda and Terraform
+name: Deploy Lambda
 
 on:
   push:
@@ -9,43 +9,9 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  terraform_test:
-    name: Terraform Plan and Apply (Test Environment)
-    runs-on: ubuntu-latest
-    environment: test  # Define the environment as 'test'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform
-
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: ./terraform
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: ./terraform
-
   deploy_test:
     name: Deploy AWS Lambda (Test Environment)
     runs-on: ubuntu-latest
-    needs: terraform_test
     environment: test  # Define the environment as 'test'
 
     steps:
@@ -94,43 +60,10 @@ jobs:
             --function-name sasss_backend_test \
             --zip-file fileb://function.zip
 
-  terraform_prod:
-    name: Terraform Plan and Apply (Production Environment)
-    runs-on: ubuntu-latest
-    environment: production  # Define the environment as 'production'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform
-
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: ./terraform
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: ./terraform
-
   deploy_prod:
     name: Deploy AWS Lambda (Production Environment)
     runs-on: ubuntu-latest
-    needs: terraform_prod
+    needs: deploy_test
     environment: production  # Define the environment as 'production'
 
     steps:
