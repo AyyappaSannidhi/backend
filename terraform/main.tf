@@ -1,8 +1,8 @@
 provider "aws" {
-  region = "us-east-1"  # Change as needed
+  region = "us-east-1"  # Adjust as necessary
 }
 
-# Create Lambda Layer for Dependencies
+# Lambda Layer for Dependencies
 resource "aws_lambda_layer_version" "dependencies_layer" {
   filename           = "dependencies.zip" # Pre-zipped dependencies
   layer_name         = "sasss_backend_dependencies"
@@ -10,6 +10,7 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
 
   lifecycle {
     create_before_destroy = true
+    ignore_changes        = [filename] # Prevent errors if file isn't present yet
   }
 }
 
@@ -24,6 +25,7 @@ resource "aws_lambda_function" "sasss_backend" {
 
   lifecycle {
     create_before_destroy = true
+    ignore_changes        = [filename] # Prevent errors if file isn't present yet
   }
 
   environment {
@@ -33,7 +35,7 @@ resource "aws_lambda_function" "sasss_backend" {
   }
 }
 
-# Create IAM Role for Lambda
+# IAM Role for Lambda Execution
 resource "aws_iam_role" "lambda_execution_role" {
   name = "lambda_execution_role"
 
@@ -53,6 +55,16 @@ resource "aws_iam_role" "lambda_execution_role" {
 resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   role       = aws_iam_role.lambda_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Output Lambda Layer ARN
+output "lambda_layer_arn" {
+  value = aws_lambda_layer_version.dependencies_layer.arn
+}
+
+# Output Lambda Function Name
+output "lambda_function_name" {
+  value = aws_lambda_function.sasss_backend.function_name
 }
 
 # # Create DynamoDB Access Policy
@@ -113,8 +125,3 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
 #   role       = aws_iam_role.lambda_execution_role.name
 #   policy_arn = aws_iam_policy.s3_access_policy.arn
 # }
-
-# Outputs
-output "lambda_function_name" {
-  value = aws_lambda_function.sasss_backend.function_name
-}
