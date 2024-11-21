@@ -53,7 +53,7 @@ jobs:
       # Package the Lambda function
       - name: Package Lambda Function
         run: |
-          zip -r function.zip  # Add only necessary files
+          zip -r function.zip src/ app.py
 
       # Deploy Lambda Function
       - name: Deploy Lambda Function
@@ -108,7 +108,7 @@ jobs:
       # Package the Lambda function
       - name: Package Lambda Function
         run: |
-          zip -r function.zip app.py  # Add only necessary files
+          zip -r function.zip src/ app.py
 
       # Deploy Lambda Function
       - name: Deploy Lambda Function
