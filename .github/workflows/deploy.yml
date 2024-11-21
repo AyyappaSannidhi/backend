@@ -41,6 +41,10 @@ jobs:
           pip install -r requirements.txt -t python/
           zip -r dependencies.zip python/
 
+      - name: Zip Lambda Function Code
+        run: |
+          zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
+
       - name: Deploy Lambda Layer (Test)
         run: |
           aws lambda publish-layer-version \
@@ -79,6 +83,10 @@ jobs:
           mkdir python
           pip install -r requirements.txt -t python/
           zip -r dependencies.zip python/
+
+      - name: Zip Lambda Function Code
+        run: |
+          zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
 
       - name: Deploy Lambda Layer (Prod)
         run: |
