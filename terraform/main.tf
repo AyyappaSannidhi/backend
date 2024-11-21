@@ -9,7 +9,7 @@ resource "null_resource" "create_dependencies_zip" {
       pip install -r requirements.txt -t python/
       zip -r dependencies.zip python/
     EOT
-    working_dir = "${path.module}/.."  # This will point to the parent directory containing requirements.txt
+    working_dir = "${path.root}"  # Points to the root directory (where requirements.txt is located)
   }
 
   triggers = {
@@ -23,8 +23,8 @@ resource "aws_lambda_layer_version" "sasss_backend_layer" {
 
   layer_name          = "sasss_backend_dependencies"
   compatible_runtimes = ["python3.12"]
-  filename            = "${path.module}/../dependencies.zip"  # Correct path to the generated zip file
-  source_code_hash    = filebase64sha256("${path.module}/../dependencies.zip")  # Correct path to the zip file
+  filename            = "${path.root}/dependencies.zip"  # Correct path to the generated zip file
+  source_code_hash    = filebase64sha256("${path.root}/dependencies.zip")  # Correct path to the zip file
 }
 
 # Lambda Function
