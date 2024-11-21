@@ -12,7 +12,7 @@ jobs:
   deploy_test:
     name: Deploy AWS Lambda (Test Environment)
     runs-on: ubuntu-latest
-    environment: test  # Define the environment as 'test'
+    environment: test
 
     steps:
       - name: Checkout Repository
@@ -41,10 +41,6 @@ jobs:
           pip install -r requirements.txt -t python/
           zip -r dependencies.zip python/
 
-      - name: Zip Lambda Function Code
-        run: |
-          zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
-
       - name: Deploy Lambda Layer (Test)
         run: |
           aws lambda publish-layer-version \
@@ -55,7 +51,7 @@ jobs:
       - name: Deploy Lambda Function (Test)
         run: |
           aws lambda update-function-code \
-            --function-name AyyappaSannidhiTestApi \
+            --function-name arn:aws:lambda:us-east-1:936944053839:function:AyyappaSannidhiTestApi \
             --zip-file fileb://function.zip
 
   deploy_prod:
@@ -84,10 +80,6 @@ jobs:
           pip install -r requirements.txt -t python/
           zip -r dependencies.zip python/
 
-      - name: Zip Lambda Function Code
-        run: |
-          zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
-
       - name: Deploy Lambda Layer (Prod)
         run: |
           aws lambda publish-layer-version \
@@ -98,5 +90,5 @@ jobs:
       - name: Deploy Lambda Function (Prod)
         run: |
           aws lambda update-function-code \
-            --function-name AyyappaSannidhiApi \
+            --function-name arn:aws:lambda:us-east-1:936944053839:function:AyyappaSannidhiApi \
             --zip-file fileb://function.zip
