@@ -9,10 +9,12 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  deploy_test:
-    name: Deploy AWS Lambda (Test Environment)
+  deploy:
     runs-on: ubuntu-latest
-    environment: test
+
+    strategy:
+      matrix:
+        environment: [test, prod]
 
     steps:
       - name: Checkout Repository
@@ -35,94 +37,33 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y awscli
 
-      # Create the Lambda Layer ZIP (dependencies.zip)
-      - name: Install Dependencies and Package Lambda Layer
-        run: |
-          mkdir python
-          pip install -r requirements.txt -t python/  # Install dependencies into the 'python' folder
-          cd python && zip -r ../dependencies.zip . && cd ..
-
-      # Deploy Lambda Layer
-      - name: Deploy Lambda Layer
-        run: |
-          aws lambda publish-layer-version \
-            --layer-name sasss_backend_dependencies_test \
-            --zip-file fileb://dependencies.zip \
-            --compatible-runtimes python3.12
-
-      # Package the Lambda function
-      - name: Package Lambda Function
-        run: |
-          zip -r function.zip src/ app.py
-
-      # Deploy Lambda Function
-      - name: Deploy Lambda Function
-        run: |
-          aws lambda update-function-code \
-            --function-name AyyappaSannidhiTestApi \
-            --zip-file fileb://function.zip
-
-      - name: Configure Lambda Function
-        run: |  
-          aws lambda update-function-configuration \
-            --function-name AyyappaSannidhiTestApi \
-            --handler app.handler
-  deploy_prod:
-    name: Deploy AWS Lambda (Production Environment)
-    runs-on: ubuntu-latest
-    needs: deploy_test
-    environment: production
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
-
-      # Create the Lambda Layer ZIP (dependencies.zip)
-      - name: Install Dependencies and Package Lambda Layer
+      - name: Package Lambda Layer
         run: |
           mkdir python
           pip install -r requirements.txt -t python/
           cd python && zip -r ../dependencies.zip . && cd ..
 
-      # Deploy Lambda Layer
       - name: Deploy Lambda Layer
         run: |
           aws lambda publish-layer-version \
-            --layer-name sasss_backend_dependencies_prod \
+            --layer-name sasss_backend_dependencies_${{ matrix.environment }} \
             --zip-file fileb://dependencies.zip \
             --compatible-runtimes python3.12
 
-      # Package the Lambda function
       - name: Package Lambda Function
         run: |
           zip -r function.zip src/ app.py
 
-      # Deploy Lambda Function
       - name: Deploy Lambda Function
         run: |
           aws lambda update-function-code \
-            --function-name AyyappaSannidhiApi \
-            --zip-file fileb://function.zip 
+            --function-name AyyappaSannidhi${{ matrix.environment | title }}Api \
+            --zip-file fileb://function.zip
 
       - name: Configure Lambda Function
-        run: |  
-          aws lambda update-function-configuration \
-            --function-name AyyappaSannidhiApi \
-            --handler app.handler
+        run: |
+          for i in {1..5}; do
+            aws lambda update-function-configuration \
+              --function-name AyyappaSannidhi${{ matrix.environment | title }}Api \
+              --handler app.handler && break || echo "Retrying in 30s..." && sleep 30;
+          done
