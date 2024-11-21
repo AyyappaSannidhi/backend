@@ -45,10 +45,12 @@ jobs:
       # Deploy Lambda Layer
       - name: Deploy Lambda Layer
         run: |
-          aws lambda publish-layer-version \
+          LAYER_ARN=$(aws lambda publish-layer-version \
             --layer-name sasss_backend_dependencies_test \
             --zip-file fileb://dependencies.zip \
-            --compatible-runtimes python3.12
+            --compatible-runtimes python3.12 \
+            --query 'LayerVersionArn' --output text)
+          echo "LAYER_ARN=$LAYER_ARN" >> $GITHUB_ENV
 
       # Package the Lambda function
       - name: Package Lambda Function
@@ -62,14 +64,21 @@ jobs:
             --function-name AyyappaSannidhiTestApi \
             --zip-file fileb://function.zip
 
+      # Attach Lambda Layer to Function
+      - name: Attach Lambda Layer
+        run: |
+          aws lambda update-function-configuration \
+            --function-name AyyappaSannidhiTestApi \
+            --layers ${{ env.LAYER_ARN }}
+
       - name: Configure Lambda Function
         run: |
-              for i in {1..5}; do
-                aws lambda update-function-configuration \
-                  --function-name AyyappaSannidhiTestApi \
-                  --handler app.handler && break || sleep 10
-                echo "Retry $i for updating function configuration..."
-              done
+          for i in {1..5}; do
+            aws lambda update-function-configuration \
+              --function-name AyyappaSannidhiTestApi \
+              --handler app.handler && break || sleep 10
+            echo "Retry $i for updating function configuration..."
+          done
         timeout-minutes: 5
 
   deploy_prod:
@@ -109,10 +118,12 @@ jobs:
       # Deploy Lambda Layer
       - name: Deploy Lambda Layer
         run: |
-          aws lambda publish-layer-version \
+          LAYER_ARN=$(aws lambda publish-layer-version \
             --layer-name sasss_backend_dependencies_prod \
             --zip-file fileb://dependencies.zip \
-            --compatible-runtimes python3.12
+            --compatible-runtimes python3.12 \
+            --query 'LayerVersionArn' --output text)
+          echo "LAYER_ARN=$LAYER_ARN" >> $GITHUB_ENV
 
       # Package the Lambda function
       - name: Package Lambda Function
@@ -126,12 +137,19 @@ jobs:
             --function-name AyyappaSannidhiApi \
             --zip-file fileb://function.zip 
 
+      # Attach Lambda Layer to Function
+      - name: Attach Lambda Layer
+        run: |
+          aws lambda update-function-configuration \
+            --function-name AyyappaSannidhiApi \
+            --layers ${{ env.LAYER_ARN }}
+
       - name: Configure Lambda Function
         run: |
-              for i in {1..5}; do
-                aws lambda update-function-configuration \
-                  --function-name AyyappaSannidhiApi \
-                  --handler app.handler && break || sleep 10
-                echo "Retry $i for updating function configuration..."
-              done
+          for i in {1..5}; do
+            aws lambda update-function-configuration \
+              --function-name AyyappaSannidhiApi \
+              --handler app.handler && break || sleep 10
+            echo "Retry $i for updating function configuration..."
+          done
         timeout-minutes: 5
