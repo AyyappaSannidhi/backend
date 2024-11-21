@@ -60,7 +60,7 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name AyyappaSannidhiTestApi \
-            --zip-file fileb://function.zip
+            --zip-file fileb://function.zip \
             --handler app.handler
 
   deploy_prod:
@@ -115,5 +115,5 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name AyyappaSannidhiApi \
-            --zip-file fileb://function.zip
+            --zip-file fileb://function.zip \
             --handler app.handler
