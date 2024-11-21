@@ -8,7 +8,6 @@ on:
 env:
   AWS_REGION: us-east-1
 
-
 jobs:
   terraform:
     name: Terraform Plan and Apply
@@ -18,8 +17,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -56,6 +55,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
       - name: Install Dependencies and Package Layer
         run: |
           mkdir python
@@ -70,7 +74,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Adjust as necessary
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy Lambda Layer
         run: |
@@ -83,3 +87,9 @@ jobs:
           aws lambda update-function-code \
             --function-name sasss_backend \
             --zip-file fileb://function.zip
+
+      - name: Cleanup
+        run: |
+          rm -rf python
+          rm dependencies.zip
+          rm function.zip
