@@ -39,7 +39,7 @@ jobs:
       - name: Install Dependencies and Package Lambda Layer
         run: |
           mkdir python
-          pip install -r requirements.txt -t python/  # Install dependencies into the 'python' folder
+          pip install -r requirements.txt -t python/
           cd python && zip -r ../dependencies.zip . && cd ..
 
       # Deploy Lambda Layer
@@ -67,9 +67,13 @@ jobs:
       # Attach Lambda Layer to Function
       - name: Attach Lambda Layer
         run: |
-          aws lambda update-function-configuration \
-            --function-name AyyappaSannidhiTestApi \
-            --layers ${{ env.LAYER_ARN }}
+          for i in {1..5}; do
+            aws lambda update-function-configuration \
+              --function-name AyyappaSannidhiTestApi \
+              --layers ${{ env.LAYER_ARN }} && break || sleep 10
+            echo "Retry $i for attaching Lambda Layer..."
+          done
+        timeout-minutes: 5
 
       - name: Configure Lambda Function
         run: |
@@ -140,9 +144,13 @@ jobs:
       # Attach Lambda Layer to Function
       - name: Attach Lambda Layer
         run: |
-          aws lambda update-function-configuration \
-            --function-name AyyappaSannidhiApi \
-            --layers ${{ env.LAYER_ARN }}
+          for i in {1..5}; do
+            aws lambda update-function-configuration \
+              --function-name AyyappaSannidhiApi \
+              --layers ${{ env.LAYER_ARN }} && break || sleep 10
+            echo "Retry $i for attaching Lambda Layer..."
+          done
+        timeout-minutes: 5
 
       - name: Configure Lambda Function
         run: |
