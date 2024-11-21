@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "FastAPI REST API Locally",
+            "invokeTarget": {
+                "target": "api",
+                "templatePath": "${workspaceFolder}/template.yaml",
+                "logicalId": "ItemsFunction"  // Make sure this matches the logical ID in your template.yaml
+            },
+            "api": {
+                "path": "/{proxy+}",  // Keeps all paths handled by your Lambda
+                "httpMethod": "ANY",  // You can adjust this to a specific method if needed
+                "payload": {
+                    "json": {}
+                }
+            },
+            "lambda": {
+                "runtime": "python3.12",
+                "environmentVariables": {
+                    "ENV": "local"
+                }
+            }
+        }
+    ]
+}
