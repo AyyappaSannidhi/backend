@@ -7,7 +7,7 @@ resource "aws_lambda_function" "sasss_backend" {
   function_name    = "sasss_backend"
   handler          = "app.handler"
   runtime          = "python3.12"
-  role             = aws_iam_role.lambda_execution_role.arn
+  role             = "lambda_execution_role"
   filename         = "function.zip"
 
   environment {
