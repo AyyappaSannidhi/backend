@@ -12,7 +12,7 @@ jobs:
   deploy_test:
     name: Deploy AWS Lambda (Test Environment)
     runs-on: ubuntu-latest
-    environment: test
+    environment: test  # Define the environment as 'test'
 
     steps:
       - name: Checkout Repository
@@ -24,7 +24,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -35,12 +35,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y awscli
 
-      - name: Install Dependencies and Package Layer
+      # Create the Lambda Layer ZIP (dependencies.zip)
+      - name: Install Dependencies and Package Lambda Layer
         run: |
           mkdir python
-          pip install -r requirements.txt -t python/
-          zip -r dependencies.zip python/
+          pip install -r requirements.txt -t python/  # Install dependencies into the 'python' folder
+          zip -r dependencies.zip python/  # Zip the dependencies folder into dependencies.zip
 
+      # Deploy Lambda Layer (Test)
       - name: Deploy Lambda Layer (Test)
         run: |
           aws lambda publish-layer-version \
@@ -48,6 +50,12 @@ jobs:
             --zip-file fileb://dependencies.zip \
             --compatible-runtimes python3.12
 
+      # Package the Lambda function (function.zip)
+      - name: Package Lambda Function (function.zip)
+        run: |
+          zip -r function.zip .  # Zip the Lambda function code into function.zip
+
+      # Deploy Lambda Function (Test)
       - name: Deploy Lambda Function (Test)
         run: |
           aws lambda update-function-code \
@@ -74,12 +82,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y awscli
 
-      - name: Install Dependencies and Package Layer
+      # Create the Lambda Layer ZIP (dependencies.zip)
+      - name: Install Dependencies and Package Lambda Layer
         run: |
           mkdir python
-          pip install -r requirements.txt -t python/
-          zip -r dependencies.zip python/
+          pip install -r requirements.txt -t python/  # Install dependencies into the 'python' folder
+          zip -r dependencies.zip python/  # Zip the dependencies folder into dependencies.zip
 
+      # Deploy Lambda Layer (Prod)
       - name: Deploy Lambda Layer (Prod)
         run: |
           aws lambda publish-layer-version \
@@ -87,6 +97,12 @@ jobs:
             --zip-file fileb://dependencies.zip \
             --compatible-runtimes python3.12
 
+      # Package the Lambda function (function.zip)
+      - name: Package Lambda Function (function.zip)
+        run: |
+          zip -r function.zip .  # Zip the Lambda function code into function.zip
+
+      # Deploy Lambda Function (Prod)
       - name: Deploy Lambda Function (Prod)
         run: |
           aws lambda update-function-code \
