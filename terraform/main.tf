@@ -2,33 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Null resource to create the dependencies.zip file
-resource "null_resource" "create_dependencies_zip" {
-  provisioner "local-exec" {
-  command = <<EOT
-    pip install -r requirements.txt -t python/
-    zip -r dependencies.zip python/
-    ls -alh dependencies.zip  # Logs the directory contents to verify the zip file is created
-  EOT
-  working_dir = "${path.module}"  # Points to the terraform folder where requirements.txt is now located
-}
-
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-}
-
-# Lambda Layer for the Function (ensures the zip file is created before this)
-resource "aws_lambda_layer_version" "sasss_backend_layer" {
-  depends_on = [null_resource.create_dependencies_zip]
-
-  layer_name          = "sasss_backend_dependencies"
-  compatible_runtimes = ["python3.12"]
-  filename            = "${path.module}/dependencies.zip"  # Correct path to the generated zip file in terraform folder
-  source_code_hash = filebase64sha256("${path.module}/dependencies.zip")
-}
-
-# Lambda Function
+# Lambda Function without the layer (Handled in the deploy.yml file)
 resource "aws_lambda_function" "sasss_backend" {
   function_name    = "sasss_backend"
   handler          = "app.handler"
@@ -41,8 +15,6 @@ resource "aws_lambda_function" "sasss_backend" {
       ENV = "production"
     }
   }
-
-  layers = [aws_lambda_layer_version.sasss_backend_layer.arn]  # Attach the layer to the Lambda function
 }
 
 # Attach Basic Execution Policy to IAM Role
@@ -53,8 +25,4 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
 
 output "lambda_function_name" {
   value = aws_lambda_function.sasss_backend.function_name
-}
-
-output "lambda_layer_arn" {
-  value = aws_lambda_layer_version.sasss_backend_layer.arn
 }
