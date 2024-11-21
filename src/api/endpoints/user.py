@@ -1,5 +1,4 @@
 from fastapi import FastAPI, APIRouter
-from mangum import Mangum
 from dataclasses import dataclass
 
 user_router = APIRouter()
