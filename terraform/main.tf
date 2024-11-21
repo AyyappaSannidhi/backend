@@ -5,12 +5,13 @@ provider "aws" {
 # Null resource to create the dependencies.zip file
 resource "null_resource" "create_dependencies_zip" {
   provisioner "local-exec" {
-    command = <<EOT
-      pip install -r requirements.txt -t python/
-      zip -r dependencies.zip python/
-    EOT
-    working_dir = "${path.module}"  # Points to the terraform directory where requirements.txt is now located
-  }
+  command = <<EOT
+    pip install -r requirements.txt -t python/
+    zip -r dependencies.zip python/
+    ls -alh dependencies.zip  # Logs the directory contents to verify the zip file is created
+  EOT
+  working_dir = "${path.module}"  # Points to the terraform folder where requirements.txt is now located
+}
 
   triggers = {
     always_run = "${timestamp()}"
@@ -24,7 +25,7 @@ resource "aws_lambda_layer_version" "sasss_backend_layer" {
   layer_name          = "sasss_backend_dependencies"
   compatible_runtimes = ["python3.12"]
   filename            = "${path.module}/dependencies.zip"  # Correct path to the generated zip file in terraform folder
-  source_code_hash    = filebase64sha256("${path.module}/dependencies.zip")  # Correct path to the zip file
+  source_code_hash = filebase64sha256("${path.module}/dependencies.zip")
 }
 
 # Lambda Function
