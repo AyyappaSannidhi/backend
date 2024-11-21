@@ -60,9 +60,13 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name AyyappaSannidhiTestApi \
-            --zip-file fileb://function.zip \
-            --handler app.handler
+            --zip-file fileb://function.zip
 
+      - name: Configure Lambda Function
+        run: |  
+          aws lambda update-function-configuration \
+            --function-name AyyappaSannidhiTestApi \
+            --handler app.handler
   deploy_prod:
     name: Deploy AWS Lambda (Production Environment)
     runs-on: ubuntu-latest
@@ -115,5 +119,10 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name AyyappaSannidhiApi \
-            --zip-file fileb://function.zip \
+            --zip-file fileb://function.zip 
+
+      - name: Configure Lambda Function
+        run: |  
+          aws lambda update-function-configuration \
+            --function-name AyyappaSannidhiApi \
             --handler app.handler
