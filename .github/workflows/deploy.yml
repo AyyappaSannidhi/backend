@@ -9,9 +9,10 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  terraform:
-    name: Terraform Plan and Apply
+  terraform_test:
+    name: Terraform Plan and Apply (Test Environment)
     runs-on: ubuntu-latest
+    environment: test  # Define the environment as 'test'
 
     steps:
       - name: Checkout Repository
@@ -41,10 +42,11 @@ jobs:
         run: terraform apply -auto-approve
         working-directory: ./terraform
 
-  deploy:
-    name: Deploy AWS Lambda
+  deploy_test:
+    name: Deploy AWS Lambda (Test Environment)
     runs-on: ubuntu-latest
-    needs: terraform
+    needs: terraform_test
+    environment: test  # Define the environment as 'test'
 
     steps:
       - name: Checkout Repository
@@ -69,6 +71,38 @@ jobs:
       - name: Zip Lambda Function Code
         run: zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
 
+      - name: Create Lambda Function (Test)
+        run: |
+          aws lambda create-function \
+            --function-name sasss_backend_test \
+            --runtime python3.12 \
+            --role arn:aws:iam::936944053839:role/lambda_execution_role \
+            --handler app.handler \
+            --zip-file fileb://function.zip \
+            --environment Variables={ENV=test}
+
+      - name: Deploy Lambda Layer (Test)
+        run: |
+          aws lambda publish-layer-version \
+            --layer-name sasss_backend_dependencies_test \
+            --zip-file fileb://dependencies.zip \
+            --compatible-runtimes python3.12
+
+      - name: Deploy Lambda Function (Test)
+        run: |
+          aws lambda update-function-code \
+            --function-name sasss_backend_test \
+            --zip-file fileb://function.zip
+
+  terraform_prod:
+    name: Terraform Plan and Apply (Production Environment)
+    runs-on: ubuntu-latest
+    environment: production  # Define the environment as 'production'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -76,21 +110,71 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy Lambda Layer
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+
+  deploy_prod:
+    name: Deploy AWS Lambda (Production Environment)
+    runs-on: ubuntu-latest
+    needs: terraform_prod
+    environment: production  # Define the environment as 'production'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Install Dependencies and Package Layer
+        run: |
+          mkdir python
+          pip install -r requirements.txt -t python/
+          zip -r dependencies.zip python/
+
+      - name: Zip Lambda Function Code
+        run: zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
+
+      - name: Create Lambda Function (Prod)
+        run: |
+          aws lambda create-function \
+            --function-name sasss_backend_prod \
+            --runtime python3.12 \
+            --role arn:aws:iam::936944053839:role/lambda_execution_role \
+            --handler app.handler \
+            --zip-file fileb://function.zip \
+            --environment Variables={ENV=prod}
+
+      - name: Deploy Lambda Layer (Prod)
         run: |
           aws lambda publish-layer-version \
-            --layer-name sasss_backend_dependencies \
+            --layer-name sasss_backend_dependencies_prod \
             --zip-file fileb://dependencies.zip \
             --compatible-runtimes python3.12
 
-      - name: Deploy Lambda Function
+      - name: Deploy Lambda Function (Prod)
         run: |
           aws lambda update-function-code \
-            --function-name sasss_backend \
+            --function-name sasss_backend_prod \
             --zip-file fileb://function.zip
-
-      - name: Cleanup
-        run: |
-          rm -rf python
-          rm dependencies.zip
-          rm function.zip
