@@ -67,7 +67,7 @@ jobs:
           zip -r dependencies.zip python/
 
       - name: Zip Lambda Function Code
-        run: zip function.zip app.py
+        run: zip function.zip app.py  # Ensure that app.py is the correct file for your Lambda handler
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -80,7 +80,8 @@ jobs:
         run: |
           aws lambda publish-layer-version \
             --layer-name sasss_backend_dependencies \
-            --zip-file fileb://dependencies.zip
+            --zip-file fileb://dependencies.zip \
+            --compatible-runtimes python3.12
 
       - name: Deploy Lambda Function
         run: |
