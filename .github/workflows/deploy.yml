@@ -53,7 +53,7 @@ jobs:
       # Package the Lambda function
       - name: Package Lambda Function
         run: |
-          zip -r function.zip app.py  # Add only necessary files
+          zip -r function.zip  # Add only necessary files
 
       # Deploy Lambda Function
       - name: Deploy Lambda Function
@@ -61,6 +61,7 @@ jobs:
           aws lambda update-function-code \
             --function-name AyyappaSannidhiTestApi \
             --zip-file fileb://function.zip
+            --handler app.handler
 
   deploy_prod:
     name: Deploy AWS Lambda (Production Environment)
@@ -115,3 +116,4 @@ jobs:
           aws lambda update-function-code \
             --function-name AyyappaSannidhiApi \
             --zip-file fileb://function.zip
+            --handler app.handler
