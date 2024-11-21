@@ -41,7 +41,7 @@ jobs:
           mkdir -p somefolder/
           mkdir -p somefolder/python
           pip install -r requirements.txt -t somefolder/python/
-          cd somefolder/python && zip -r ../../dependencies.zip . && cd .. && cd ..
+          cd somefolder/ && zip -r ../dependencies.zip . && cd ..
           ls somefolder/
 
       # Deploy Lambda Layer
