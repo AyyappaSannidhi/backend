@@ -19,30 +19,35 @@ def get_picture_gallery(page: int = 1, size: int = 20, s3=Depends(get_s3_client)
         # Calculate the starting index for pagination
         start_index = (page - 1) * limit_per_page
 
-        # get all s3 folder items data
+        # Get all S3 folder items data
         response = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_prefix)
 
         if "Contents" not in response:
             return {"images": [], "total": 0, "total_pages": 0, "next_page": None}
-        
-        image_keys = [content["Key"] for content in response["Contents"]]
-        image_keys.pop(0) # popping first element as it is like meta data
 
-        total_images = len(image_keys)
+        # Get all objects excluding the first one if it is metadata
+        image_objects = response["Contents"]
+        image_objects.pop(0)  # Remove metadata object if needed
+
+        # Sort objects by `LastModified` in descending order (newest first)
+        sorted_objects = sorted(image_objects, key=lambda obj: obj["LastModified"], reverse=True)
+
+        # Extract keys for pagination
+        total_images = len(sorted_objects)
         total_pages = (total_images + limit_per_page - 1) // limit_per_page  # Calculate total pages
-        paginated_keys = image_keys[start_index:start_index + limit_per_page]
+        paginated_objects = sorted_objects[start_index:start_index + limit_per_page]
 
-        # Generating presigned URLs
-        signed_urls = []
-        for key in paginated_keys:
-            signed_url = s3.generate_presigned_url(
+        # Generate presigned URLs for paginated objects
+        signed_urls = [
+            s3.generate_presigned_url(
                 "get_object",
-                Params={"Bucket": bucket_name, "Key": key},
+                Params={"Bucket": bucket_name, "Key": obj["Key"]},
                 ExpiresIn=1200
             )
-            signed_urls.append(signed_url)
+            for obj in paginated_objects
+        ]
 
-        # checking if there i a next page
+        # Check if there is a next page
         next_page = page + 1 if page < total_pages else None
 
         return {
@@ -56,3 +61,37 @@ def get_picture_gallery(page: int = 1, size: int = 20, s3=Depends(get_s3_client)
         logger.info(f"An error occurred: {e}")
         return internal_server_error()
     
+@assets_router.get("/carousel", status_code=status.HTTP_200_OK)
+def get_carousel(s3=Depends(get_s3_client)):
+    try:
+        bucket_name = Config.AWS_S3_BUCKET_NAME
+        folder_prefix = "carousel/"
+        
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_prefix)
+
+        # Check if there are objects in the folder
+        if "Contents" not in response:
+            return {"images": []}
+
+        # Get all objects excluding the first one if it is metadata
+        image_objects = response["Contents"]
+        image_objects.pop(0)  # Remove metadata object if needed
+
+        # Sort objects by `LastModified` in descending order (newest first)
+        sorted_objects = sorted(image_objects, key=lambda obj: obj["LastModified"], reverse=True)
+
+        # Generate signed URLs for the sorted objects
+        signed_urls = [
+            s3.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": bucket_name, "Key": obj["Key"]},
+                ExpiresIn=1200
+            )
+            for obj in sorted_objects
+        ]
+
+        return {"images": signed_urls}
+
+    except ClientError as e:
+        logger.info(f"An error occurred: {e}")
+        return internal_server_error()

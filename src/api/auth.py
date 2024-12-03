@@ -195,3 +195,15 @@ async def otp_verify(request : Request, otp_details: OtpDetails, temp_ttl_table 
     except Exception as e:
         logger.info(f"Error: {str(e)}")
         return internal_server_error()
+
+
+@auth_router.post("/logout", status_code=status.HTTP_201_CREATED)
+def logout(request : Request):
+    try:
+        response =  custom_response(Constants.LOGOUT_SUCCESS, status.HTTP_201_CREATED)
+        response.delete_cookie(key="access_token")
+        response.delete_cookie(key="refresh_token")
+        return response
+    except Exception as e:
+        logger.info(f"Error: {str(e)}")
+        return internal_server_error()

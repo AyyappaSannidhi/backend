@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request, status
 from mangum import Mangum
 from src.api.user import user_router
 from src.api.auth import auth_router
@@ -20,6 +20,19 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Allowed HTTP methods
     allow_headers=["Authorization", "Content-Type"],  # Allowed headers
 )
+# Custom middleware to enforce 'Origin' header in production
+@app.middleware("http")
+async def enforce_origin_in_production(request: Request, call_next):
+    # Check if the environment is production
+    if Config.APP_ENV == "production":
+        if "origin" not in request.headers:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden: Missing Origin header"
+            )
+    
+    # Proceed with the request
+    return await call_next(request)
 
 app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
