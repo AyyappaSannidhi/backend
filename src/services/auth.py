@@ -268,7 +268,7 @@ def response_with_extra_data(message, extra_data, tokens=None, status_code=statu
 def bot_protection(func: Callable):
     @wraps(func)
     async def wrapper(request: Request, *args, **kwargs):
-        if Config.APP_ENV != "LOCAL":
+        if Config.BOT_PROTECTION == "YES":
             # Extract token from the header
             access_token = request.headers.get("Authorization")
             if not access_token:
