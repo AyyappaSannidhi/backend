@@ -21,3 +21,4 @@ class Constants():
     OTP = "otp"
     USER_NOT_FOUND = "User not found"
     USER_PROFILE_UPDATED = "User profile is successfully updated"
+    LOGOUT_SUCCESS="Logout success"
