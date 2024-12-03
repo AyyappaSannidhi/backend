@@ -243,3 +243,6 @@ $RECYCLE.BIN/
 .aws-sam
 *.DS_Store
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
+
+.DS_Store
+*.template.yaml
