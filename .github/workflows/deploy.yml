@@ -10,6 +10,10 @@ env:
   MAIL_APP_PASSWORD: '${{ secrets.MAIL_APP_PASSWORD }}'
   AWS_ACCESS_KEY_ID : ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  SENDER_EMAIL: '${{ vars.SENDER_EMAIL }}'
+  TURNSTILE_URL: '${{ vars.TURNSTILE_URL }}'
+  JWT_ALGO: '${{ vars.JWT_ALGO }}'
+  JWT_EXPIRY_MIN: '${{ vars.JWT_EXPIRY_MIN }}'
 
 jobs:
   deploy_test:
@@ -87,10 +91,10 @@ jobs:
               --handler app.handler \
               --environment "Variables={
                 APP_ENV: 'test',
-                SENDER_EMAIL: '${{ vars.SENDER_EMAIL }}',
-                TURNSTILE_URL: '${{ vars.TURNSTILE_URL }}'
-                JWT_ALGO: '${{ vars.JWT_ALGO }}',
-                JWT_EXPIRY_MIN: '${{ vars.JWT_EXPIRY_MIN }}',
+                SENDER_EMAIL: '${{ env.SENDER_EMAIL }}',
+                TURNSTILE_URL: '${{ env.TURNSTILE_URL }}'
+                JWT_ALGO: '${{ env.JWT_ALGO }}',
+                JWT_EXPIRY_MIN: '${{ env.JWT_EXPIRY_MIN }}',
                 GOOGLE_CLIENT_ID: '${{ env.GOOGLE_CLIENT_ID }}',
                 MAIL_APP_PASSWORD: '${{ env.MAIL_APP_PASSWORD }}',
                 APP_SECRET: '${{ secrets.APP_SECRET }}',
@@ -180,10 +184,10 @@ jobs:
                 --handler app.handler \
                 --environment "Variables={
                   APP_ENV: 'production',
-                  SENDER_EMAIL: '${{ vars.SENDER_EMAIL }}',
-                  TURNSTILE_URL: '${{ vars.TURNSTILE_URL }}'
-                  JWT_ALGO: '${{ vars.JWT_ALGO }}',
-                  JWT_EXPIRY_MIN: '${{ vars.JWT_EXPIRY_MIN }}',
+                  SENDER_EMAIL: '${{ env.SENDER_EMAIL }}',
+                  TURNSTILE_URL: '${{ env.TURNSTILE_URL }}'
+                  JWT_ALGO: '${{ env.JWT_ALGO }}',
+                  JWT_EXPIRY_MIN: '${{ env.JWT_EXPIRY_MIN }}',
                   GOOGLE_CLIENT_ID: '${{ env.GOOGLE_CLIENT_ID }}',
                   MAIL_APP_PASSWORD: '${{ env.MAIL_APP_PASSWORD }}',
                   APP_SECRET: '${{ secrets.APP_SECRET }}',
