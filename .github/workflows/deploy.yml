@@ -89,7 +89,7 @@ jobs:
             aws lambda update-function-configuration \
               --function-name AyyappaSannidhiTestApi \
               --handler app.handler \
-              --environment "Variables={APP_ENV='test',SENDER_EMAIL='${{ env.SENDER_EMAIL }}',TURNSTILE_URL='${{ env.TURNSTILE_URL }}',JWT_ALGO='${{ env.JWT_ALGO }}',JWT_EXPIRY_MIN='${{ env.JWT_EXPIRY_MIN }}',GOOGLE_CLIENT_ID='${{ env.GOOGLE_CLIENT_ID }}',MAIL_APP_PASSWORD='${{ env.MAIL_APP_PASSWORD }}',APP_SECRET='${{ secrets.APP_SECRET }}',AWS_S3_BUCKET_NAME='${{ secrets.AWS_S3_BUCKET_NAME }}',ALLOWED_ORIGINS='${{ secrets.ALLOWED_ORIGINS }}',TURNSTILE_SECRET_KEY='${{ secrets.TURNSTILE_SECRET_KEY }}',USERS_TABLE='${{ secrets.USERS_TABLE }}',TTL_TABLE='${{ secrets.TTL_TABLE }}'}" && break || sleep 10
+              --environment "Variables={APP_ENV='test',SENDER_EMAIL='${{ env.SENDER_EMAIL }}',TURNSTILE_URL='${{ env.TURNSTILE_URL }}',JWT_ALGO='${{ env.JWT_ALGO }}',JWT_EXPIRY_MIN='${{ env.JWT_EXPIRY_MIN }}',GOOGLE_CLIENT_ID='${{ env.GOOGLE_CLIENT_ID }}',MAIL_APP_PASSWORD='${{ env.MAIL_APP_PASSWORD }}',APP_SECRET='${{ secrets.APP_SECRET }}',AWS_S3_BUCKET_NAME='${{ secrets.AWS_S3_BUCKET_NAME }}',ALLOWED_ORIGINS='${{ secrets.ALLOWED_ORIGINS }}',TURNSTILE_SECRET_KEY='${{ secrets.TURNSTILE_SECRET_KEY }}',USERS_TABLE='${{ secrets.USERS_TABLE }}',TTL_TABLE='${{ secrets.TTL_TABLE }}',TTL_TABLE='${{ secrets.BOT_PROTECTION }}'}" && break || sleep 10
             echo "Retry $i for updating function configuration..."
           done
         timeout-minutes: 5
@@ -168,7 +168,7 @@ jobs:
             aws lambda update-function-configuration \
               --function-name AyyappaSannidhiApi \
               --handler app.handler \
-              --environment "Variables={APP_ENV='test',SENDER_EMAIL='${{ env.SENDER_EMAIL }}',TURNSTILE_URL='${{ env.TURNSTILE_URL }}',JWT_ALGO='${{ env.JWT_ALGO }}',JWT_EXPIRY_MIN='${{ env.JWT_EXPIRY_MIN }}',GOOGLE_CLIENT_ID='${{ env.GOOGLE_CLIENT_ID }}',MAIL_APP_PASSWORD='${{ env.MAIL_APP_PASSWORD }}',APP_SECRET='${{ secrets.APP_SECRET }}',AWS_S3_BUCKET_NAME='${{ secrets.AWS_S3_BUCKET_NAME }}',ALLOWED_ORIGINS='${{ secrets.ALLOWED_ORIGINS }}',TURNSTILE_SECRET_KEY='${{ secrets.TURNSTILE_SECRET_KEY }}',USERS_TABLE='${{ secrets.USERS_TABLE }}',TTL_TABLE='${{ secrets.TTL_TABLE }}'}" && break || sleep 10
+              --environment "Variables={APP_ENV='test',SENDER_EMAIL='${{ env.SENDER_EMAIL }}',TURNSTILE_URL='${{ env.TURNSTILE_URL }}',JWT_ALGO='${{ env.JWT_ALGO }}',JWT_EXPIRY_MIN='${{ env.JWT_EXPIRY_MIN }}',GOOGLE_CLIENT_ID='${{ env.GOOGLE_CLIENT_ID }}',MAIL_APP_PASSWORD='${{ env.MAIL_APP_PASSWORD }}',APP_SECRET='${{ secrets.APP_SECRET }}',AWS_S3_BUCKET_NAME='${{ secrets.AWS_S3_BUCKET_NAME }}',ALLOWED_ORIGINS='${{ secrets.ALLOWED_ORIGINS }}',TURNSTILE_SECRET_KEY='${{ secrets.TURNSTILE_SECRET_KEY }}',USERS_TABLE='${{ secrets.USERS_TABLE }}',TTL_TABLE='${{ secrets.TTL_TABLE }}',TTL_TABLE='${{ secrets.BOT_PROTECTION }}'}" && break || sleep 10
             echo "Retry $i for updating function configuration..."
           done
         timeout-minutes: 5

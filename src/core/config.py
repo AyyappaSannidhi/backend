@@ -19,4 +19,5 @@ class Config():
     TURNSTILE_URL = os.environ.get('TURNSTILE_URL')
     USERS_TABLE = os.environ.get('USERS_TABLE')
     TTL_TABLE = os.environ.get('TTL_TABLE')
+    BOT_PROTECTION=os.environ.get('BOT_PROTECTION')
 
