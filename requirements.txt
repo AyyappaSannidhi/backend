@@ -1,4 +1,9 @@
 requests
-mangum 
-fastapi
+mangum
+fastapi[standard]
 boto3
+bcrypt
+pyjwt
+google-auth
+cachetools
+aws-lambda-powertools
