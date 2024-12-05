@@ -226,7 +226,7 @@ def get_existing_data_by_id(id, temp_ttl_table):
         return response["Item"] if response.get('Item') else None
     except Exception as e:
         logger.info(f"Error: {str(e)}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+        return None
     
 def create_token(user_data,access_token = None, refresh_token = None, payload = None):
     response = defaultdict()
